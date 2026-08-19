@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+	Sign up
+{% endblock %}
+{% block body %}
+	<div class="row justify-content-center">
+		<div class="col-12 col-sm-8 col-md-6 col-lg-4">
+			<div class="mb-4">
+				<div class="fw-bold text-primary fs-4 mb-3">
+					THE APP
+				</div>
+				<p class="text-body-secondary mb-4">
+					Create an account
+				</p>
+			</div>
+			{% for flash_error in app.flashes('verify_email_error') %}
+				<div class="alert alert-danger" role="alert">
+					{{ flash_error }}
+				</div>
+			{% endfor %}
+			{{ form_errors(registrationForm) }}
+			{{ form_start(registrationForm) }}
+			<div class="form-floating mb-3">
+				{{ form_widget(registrationForm.name, {
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Name'
+                    }
+                }) }}
+				{{ form_label(registrationForm.name, 'Name') }}
+				{{ form_errors(registrationForm.name) }}
+			</div>
+			<div class="mb-3">
+				<div class="form-floating position-relative">
+					{{ form_widget(registrationForm.email, {
+                        attr: {
+                            class: 'form-control pe-5',
+                            placeholder: 'Email'
+                        }
+                    }) }}
+					{{ form_label(registrationForm.email, 'Email') }}
+					<span class="form-field-icon position-absolute top-50 end-0 translate-middle-y me-3 text-body-secondary">
+						<i class="bi bi-envelope"></i>
+					</span>
+				</div>
+				{{ form_errors(registrationForm.email) }}
+			</div>
+			<div class="mb-3">
+				<div class="form-floating position-relative">
+					{{ form_widget(registrationForm.plainPassword, {
+                        attr: {
+                            class: 'form-control pe-5',
+                            placeholder: 'Password'
+                        }
+                    }) }}
+					{{ form_label(registrationForm.plainPassword, 'Password') }}
+					<button type="button" id="toggle-password" class="form-field-icon btn border-0 position-absolute top-50 end-0 translate-middle-y me-3 p-0" data-password-toggle="{{ registrationForm.plainPassword.vars.id }}" aria-label="Show password">
+						<i id="password-icon" class="bi bi-eye"></i>
+					</button>
+				</div>
+				{{ form_errors(registrationForm.plainPassword) }}
+			</div>
+			<button type="submit" class="btn btn-primary w-100 py-2">
+				Sign up
+			</button>
+			<div class="text-center mt-3">
+				<small class="text-body-secondary">
+					Already have an account?
+					<a href="{{ path('app_login') }}" class="text-decoration-none">
+						Sign in
+					</a>
+				</small>
+			</div>
+			{{ form_end(registrationForm) }}
+		</div>
+	</div>
+{% endblock %}

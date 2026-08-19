@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+	Users
+{% endblock %}
+{% block body %}
+	{% for message in app.flashes('users_success') %}
+		<div class="alert alert-success" role="alert">
+			{{ message }}
+		</div>
+	{% endfor %}
+	{% for message in app.flashes('users_warning') %}
+		<div class="alert alert-warning" role="alert">
+			{{ message }}
+		</div>
+	{% endfor %}
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h1 class="h3 mb-1">Users</h1>
+			<p class="text-body-secondary mb-0">
+				Manage registered users
+			</p>
+		</div>
+	</div>
+	<form method="post" id="users-form">
+		<div class="d-flex align-items-center gap-2 mb-3">
+			<button type="submit" class="btn btn-outline-primary" formaction="{{ path('app_users_status') }}" name="status" value="blocked" id="block-users" disabled>
+				<i class="bi bi-lock-fill me-1"></i>
+				Block
+			</button>
+			<button type="submit" class="btn btn-outline-success" formaction="{{ path('app_users_status') }}" name="status" value="active" id="unblock-users" title="Unblock selected users" aria-label="Unblock selected users" disabled>
+				<i class="bi bi-unlock-fill"></i>
+			</button>
+			<button type="submit" class="btn btn-outline-danger" formaction="{{ path('app_users_delete') }}" id="delete-users" title="Delete selected users" aria-label="Delete selected users" disabled>
+				<i class="bi bi-trash"></i>
+			</button>
+			<button type="submit" class="btn btn-outline-danger" formaction="{{ path('app_users_delete_unverified') }}" title="Delete all unverified users" aria-label="Delete all unverified users">
+				<i class="bi bi-person-x"></i>
+			</button>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-hover align-middle">
+				<thead>
+					<tr>
+						<th scope="col" style="width: 48px;">
+							<input class="form-check-input" type="checkbox" id="select-all" aria-label="Select all users">
+						</th>
+						<th scope="col">
+							Name
+						</th>
+						<th scope="col">
+							Email
+						</th>
+						<th scope="col">
+							Status
+						</th>
+						<th scope="col">
+							Last login
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for user in users %}
+						<tr>
+							<td>
+								<input class="form-check-input user-checkbox" type="checkbox" name="users[]" value="{{ user.id }}" aria-label="Select {{ user.email }}">
+							</td>
+							<td>
+								<div class="text-truncate" style="max-width: 260px;" title="{{ user.name }}">
+									{{ user.name }}
+								</div>
+							</td>
+							<td>
+								<div class="text-truncate" style="max-width: 300px;" title="{{ user.email }}">
+									{{ user.email }}
+								</div>
+							</td>
+							<td>
+								{% if user.status == 'active' %}
+									<span class="badge text-bg-success">
+										Active
+									</span>
+								{% elseif user.status == 'blocked' %}
+									<span class="badge text-bg-danger">
+										Blocked
+									</span>
+								{% else %}
+									<span class="badge text-bg-secondary">
+										Unverified
+									</span>
+								{% endif %}
+							</td>
+							<td>
+								{% if user.lastLoggedInAt %}
+									<time datetime="{{ user.lastLoggedInAt|date('c') }}" title="{{ user.lastLoggedInAt|date('F j, Y H:i:s') }}">
+										{{ user.lastLoggedInAt|date('F j, Y H:i:s') }}
+									</time>
+								{% else %}
+									<span class="text-body-secondary">
+										Never
+									</span>
+								{% endif %}
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="5" class="text-center text-body-secondary py-4">
+								No users found.
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<input type="hidden" name="_token" value="{{ csrf_token('users_management') }}">
+	</form>
+{% endblock %}
