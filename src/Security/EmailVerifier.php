@@ -48,6 +48,7 @@ class EmailVerifier
     {
         $this->verifyEmailHelper->validateEmailConfirmationFromRequest($request, (string) $user->getId(), (string) $user->getEmail());
 
+        $user->setIsVerified(true);
         if ($user->getStatus() === 'unverified') {
             $user->setStatus('active');
         }

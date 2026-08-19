@@ -26,13 +26,12 @@ final class UserController extends AbstractController
     }
 
     #[Route('/users/status', name: 'app_users_status', methods: ['POST'])]
-    public function updateStatus(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
-    {
+    public function updateStatus(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): Response {
         $this->validateCsrfToken($request);
         $status = $request->request->get('status');
-        if ($status !== "active" && $status !== "blocked")
+        if ($status !== 'active' && $status !== 'blocked') {
             throw $this->createNotFoundException();
-
+        }
         $userIds = $request->request->all('users');
         if ($userIds === []) {
             $this->addFlash('users_warning', 'Please select at least one user.');
@@ -41,19 +40,21 @@ final class UserController extends AbstractController
         $users = $userRepository->findBy(['id' => $userIds]);
         $changed = 0;
         foreach ($users as $user) {
-            if ($user->getStatus() !== $status) {
-                $user->setStatus($status);
-                $changed++;
+            $newStatus = $status === 'blocked' ? 'blocked' : ($user->getIsVerified() ? 'active' : 'unverified');
+            if ($user->getStatus() === $newStatus) {
+                continue;
             }
+            $user->setStatus($newStatus);
+            $changed++;
         }
-        if ($changed > 0) {
-            $entityManager->flush();
-            $message = $status === 'blocked' ? 'Selected users were blocked.' : 'Selected users were unblocked.';
-            $this->addFlash('users_success', $message);
-        } else {
+        if ($changed === 0) {
             $message = $status === 'blocked' ? 'Selected users are already blocked.' : 'Selected users are already unblocked.';
             $this->addFlash('users_warning', $message);
+            return $this->redirectToRoute('app_users');
         }
+        $entityManager->flush();
+        $message = $status === 'blocked' ? 'Selected users were blocked.' : 'Selected users were unblocked.';
+        $this->addFlash('users_success', $message);
         return $this->redirectToRoute('app_users');
     }
 
