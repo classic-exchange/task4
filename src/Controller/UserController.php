@@ -39,12 +39,21 @@ final class UserController extends AbstractController
             return $this->redirectToRoute('app_users');
         }
         $users = $userRepository->findBy(['id' => $userIds]);
+        $changed = 0;
         foreach ($users as $user) {
-            $user->setStatus($status);
+            if ($user->getStatus() !== $status) {
+                $user->setStatus($status);
+                $changed++;
+            }
         }
-        $entityManager->flush();
-        $message = $status === 'blocked' ? 'Selected users were blocked.' : 'Selected users were unblocked.';
-        $this->addFlash('users_success', $message);
+        if ($changed > 0) {
+            $entityManager->flush();
+            $message = $status === 'blocked' ? 'Selected users were blocked.' : 'Selected users were unblocked.';
+            $this->addFlash('users_success', $message);
+        } else {
+            $message = $status === 'blocked' ? 'Selected users are already blocked.' : 'Selected users are already unblocked.';
+            $this->addFlash('users_warning', $message);
+        }
         return $this->redirectToRoute('app_users');
     }
 
@@ -68,7 +77,8 @@ final class UserController extends AbstractController
     }
 
     #[Route('/users/delete-unverified', name: 'app_users_delete_unverified', methods: ['POST'])]
-    public function deleteUnverified(UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, Security $security): Response {
+    public function deleteUnverified(UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, Security $security): Response
+    {
         $this->validateCsrfToken($request);
         $users = $userRepository->findBy(['status' => 'unverified']);
         if ($users === []) {
